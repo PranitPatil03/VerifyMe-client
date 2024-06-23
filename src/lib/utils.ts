@@ -65,13 +65,13 @@ export const loginFormSchema = z.object({
 });
 
 
-export const getEmail = (): string | null => {
+export const getEmail = ()=> {
   const formDataString = localStorage.getItem("formData");
   if (formDataString) {
     try {
       const parsedFormData = JSON.parse(formDataString);
       console.log("Parsed Form Data:", parsedFormData);
-      return parsedFormData?.User?.email || null;
+      return parsedFormData
     } catch (error) {
       console.error("Error parsing formData JSON:", error);
       return null;

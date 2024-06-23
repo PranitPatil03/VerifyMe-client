@@ -55,7 +55,7 @@ const SignInForm = () => {
         formData
       );
       const data = response.data;
-      console.log("Line 571", data);
+      localStorage.setItem("formData", JSON.stringify(data));
       setUserData(data);
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {

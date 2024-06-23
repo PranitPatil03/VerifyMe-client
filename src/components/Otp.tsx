@@ -15,7 +15,8 @@ const Otp: React.FC = () => {
   const [message, setMessage] = useState<string>("");
   const [status, setStatus] = useState<string>("");
 
-  const userEmail: string | null = getEmail();
+  const userData = getEmail();
+  const email=userData?.User?.email
 
   useEffect(() => {
     if (status) {
@@ -23,7 +24,7 @@ const Otp: React.FC = () => {
     }
   }, [status, navigate]);
 
-  if (!userEmail) {
+  if (!email) {
     return null;
   }
 
@@ -46,7 +47,7 @@ const Otp: React.FC = () => {
     e.preventDefault();
     const otpString = otp.join("");
     if (otpString.length === 6) {
-      await verifyOtp(userEmail, otpString);
+      await verifyOtp(email, otpString);
     } else {
       setMessage("Please enter a valid 6-digit OTP");
     }
@@ -54,7 +55,7 @@ const Otp: React.FC = () => {
 
   const handleResend = async () => {
     setMessage("OTP resent to your email");
-    await sendOtp(userEmail);
+    await sendOtp(email);
   };
 
   const verifyOtp = async (email: string, userOtp: string) => {
@@ -85,7 +86,7 @@ const Otp: React.FC = () => {
               <p>Email Verification</p>
             </div>
             <div className="flex flex-row text-sm font-medium text-gray-400">
-              <p>We have sent a code to your email {userEmail}</p>
+              <p>We have sent a code to your email {email}</p>
             </div>
           </div>
           <div>
