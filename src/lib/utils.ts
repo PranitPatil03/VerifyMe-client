@@ -63,3 +63,21 @@ export const loginFormSchema = z.object({
       "Invalid email format"
     ),
 });
+
+
+export const getEmail = (): string | null => {
+  const formDataString = localStorage.getItem("formData");
+  if (formDataString) {
+    try {
+      const parsedFormData = JSON.parse(formDataString);
+      console.log("Parsed Form Data:", parsedFormData);
+      return parsedFormData?.User?.email || null;
+    } catch (error) {
+      console.error("Error parsing formData JSON:", error);
+      return null;
+    }
+  } else {
+    console.log("No formData found in localStorage");
+    return null;
+  }
+};

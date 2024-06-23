@@ -6,18 +6,6 @@ import SignUpPage from "./Page/SignUpPage";
 import Otp from "./components/Otp";
 import Profile from "./components/Profile";
 
-// Function to get email from localStorage
-export const getEmail = (): string | null => {
-  const formDataString = localStorage.getItem("formData");
-  if (formDataString) {
-    const parsedFormData = JSON.parse(formDataString);
-    return parsedFormData.email;
-  } else {
-    console.log("No formData found in localStorage");
-    return null;
-  }
-};
-
 const router = createBrowserRouter([
   {
     path: "/",
@@ -29,7 +17,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/otp",
-    element: <Otp email={getEmail() || "default@example.com"} />,
+    element: <Otp />,
   },
   {
     path: "/profile",

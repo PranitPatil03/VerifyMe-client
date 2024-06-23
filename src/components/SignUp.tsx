@@ -13,7 +13,7 @@ const SignUp = () => {
           <div className="w-full">
             <img src={SignUpIcon} alt="image" className="object-fill" />
           </div>
-          <div className="w-full flex items-center justify-start">
+          <div className="w-full flex items-center justify-center md:justify-start">
             <Card className="w-[350px] md:w-[500px]">
               <CardHeader>
                 <CardTitle>

@@ -71,7 +71,6 @@ const SignUpForm = () => {
 
   async function onSubmit(values: z.infer<typeof SignUpFormSchema>) {
     console.log("Line 361", values);
-    localStorage.setItem("formData", JSON.stringify(values));
     await signup(values);
     await sendOtp(values.email);
     navigate("/otp");
@@ -89,6 +88,7 @@ const SignUpForm = () => {
         formData
       );
       const data = response.data;
+      localStorage.setItem("formData", JSON.stringify(data));
       setUserData(data);
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {

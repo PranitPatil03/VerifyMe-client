@@ -1,18 +1,31 @@
-import React, { ChangeEvent, FormEvent, useState } from "react";
-import { sendOtp } from "./SignUpForm";
+import React, { ChangeEvent, FormEvent, useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { getEmail } from "@/lib/utils";
+import { sendOtp } from "./SignUpForm";
 
-interface OtpProps {
-  email: string;
+interface VerifyOtpResponse {
+  status: string;
 }
 
-const Otp: React.FC<OtpProps> = ({ email }) => {
+const Otp: React.FC = () => {
   const navigate = useNavigate();
 
   const [otp, setOtp] = useState<string[]>(["", "", "", "", "", ""]);
   const [message, setMessage] = useState<string>("");
-  const [status, setStatus] = useState<boolean>(false);
+  const [status, setStatus] = useState<string>("");
+
+  const userEmail: string | null = getEmail();
+
+  useEffect(() => {
+    if (status) {
+      navigate("/login");
+    }
+  }, [status, navigate]);
+
+  if (!userEmail) {
+    return null;
+  }
 
   const handleChange = (
     e: ChangeEvent<HTMLInputElement>,
@@ -33,7 +46,7 @@ const Otp: React.FC<OtpProps> = ({ email }) => {
     e.preventDefault();
     const otpString = otp.join("");
     if (otpString.length === 6) {
-      await verifyOtp(email, otpString);
+      await verifyOtp(userEmail, otpString);
     } else {
       setMessage("Please enter a valid 6-digit OTP");
     }
@@ -41,30 +54,27 @@ const Otp: React.FC<OtpProps> = ({ email }) => {
 
   const handleResend = async () => {
     setMessage("OTP resent to your email");
-    await sendOtp(email);
+    await sendOtp(userEmail);
   };
-
-  console.log("status", status);
 
   const verifyOtp = async (email: string, userOtp: string) => {
     const data = {
       email,
       userOtp,
     };
-    axios
-      .post(import.meta.env.VITE_SERVER_DOMAIN + "/api/auth/verify-otp", data)
-      .then(({ data }) => {
-        console.log(data);
-        setStatus(data.status);
-      })
-      .catch(({ response }) => {
-        console.log(response);
-      });
-  };
 
-  if(status){
-    navigate("/login");
-  }
+    try {
+      const response = await axios.post<VerifyOtpResponse>(
+        `${import.meta.env.VITE_SERVER_DOMAIN}/api/auth/verify-otp`,
+        data
+      );
+      const responseData = response.data;
+      setStatus(responseData.status);
+    } catch (error) {
+      console.log("Error verifying OTP:", error);
+      setStatus("");
+    }
+  };
 
   return (
     <div className="relative flex min-h-screen flex-col justify-center overflow-hidden md:bg-gray-50 py-10 md:py-12">
@@ -75,7 +85,7 @@ const Otp: React.FC<OtpProps> = ({ email }) => {
               <p>Email Verification</p>
             </div>
             <div className="flex flex-row text-sm font-medium text-gray-400">
-              <p>We have sent a code to your email {email}</p>
+              <p>We have sent a code to your email {userEmail}</p>
             </div>
           </div>
           <div>
