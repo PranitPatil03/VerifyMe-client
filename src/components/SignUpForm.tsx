@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -7,35 +8,65 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { PasswordInput } from "./PasswordInput";
-import { formSchema } from "@/lib/utils";
+import { SignUpFormSchema, signUpType } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import axios from "axios";
+
+export const sendOtp = async (email: string) => {
+  axios
+    .post(import.meta.env.VITE_SERVER_DOMAIN + "/api/auth/send-mail", { email })
+    .then(({ data }) => {
+      console.log(data);
+    })
+    .catch(({ response }) => {
+      console.log(response);
+    });
+};
 
 const SignUpForm = () => {
   const navigate = useNavigate();
+  const [userData, setUserData] = useState<signUpType | undefined>();
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<z.infer<typeof SignUpFormSchema>>({
+    resolver: zodResolver(SignUpFormSchema),
     defaultValues: {
       firstName: "",
       lastName: "",
       password: "",
       confirmPassword: "",
-      contactMode: "email",
       email: "",
       phoneNumber: "",
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
-    navigate("/login");
+  async function onSubmit(values: z.infer<typeof SignUpFormSchema>) {
+    console.log("Line 361", values);
+    localStorage.setItem("formData", JSON.stringify(values));
+    await signup(values);
+    await sendOtp(values.email);
+    navigate("/otp");
   }
+
+  const erros = form.formState.errors;
+  console.log(erros);
+
+  console.log("Line 45", userData);
+
+  const signup = async (formData: signUpType) => {
+    axios
+      .post(import.meta.env.VITE_SERVER_DOMAIN + "/api/auth/signup", formData)
+      .then(({ data }) => {
+        setUserData(data);
+      })
+      .catch(({ response }) => {
+        console.log(response);
+      });
+  };
 
   return (
     <div className="md:mx-2">
@@ -89,7 +120,7 @@ const SignUpForm = () => {
               </FormItem>
             )}
           />
-          <FormField
+          {/* <FormField
             control={form.control}
             name="contactMode"
             render={({ field }) => (
@@ -120,37 +151,33 @@ const SignUpForm = () => {
                 <FormMessage />
               </FormItem>
             )}
+          /> */}
+
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem className="w-full ">
+                <FormControl>
+                  <Input placeholder="Enter Mail" type="mail" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
 
-          {form.watch("contactMode") === "email" && (
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem className="w-full ">
-                  <FormControl>
-                    <Input placeholder="Enter Mail" type="mail" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          )}
-
-          {form.watch("contactMode") === "phone" && (
-            <FormField
-              control={form.control}
-              name="phoneNumber"
-              render={({ field }) => (
-                <FormItem className="w-full ">
-                  <FormControl>
-                    <Input placeholder="Enter Phone Number" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          )}
+          <FormField
+            control={form.control}
+            name="phoneNumber"
+            render={({ field }) => (
+              <FormItem className="w-full ">
+                <FormControl>
+                  <Input placeholder="Enter Phone Number" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           <Button
             type="submit"

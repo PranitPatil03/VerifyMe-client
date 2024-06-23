@@ -10,28 +10,45 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { formSchema } from "@/lib/utils";
-import { PasswordInput } from "./PasswordInput";
+import { loginFormSchema, loginType} from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { useState } from "react";
+import { LoginPasswordInput } from "./LoginPasswordInput";
 
 const SignInForm = () => {
   const navigate = useNavigate();
+  const [userData, setUserData] = useState<loginType | undefined>();
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<z.infer<typeof loginFormSchema>>({
+    resolver: zodResolver(loginFormSchema),
     defaultValues: {
-      firstName: "",
-      lastName: "",
-      password: "",
-      confirmPassword: "",
-      contactMode: "email",
       email: "",
+      password: ""
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  console.log(userData);
+
+  const erros = form.formState.errors;
+  console.log("Line 37", erros);
+
+  async function onSubmit(values: z.infer<typeof loginFormSchema>) {
+    await login(values);
     console.log(values);
+    navigate("/profile");
   }
+
+  const login = async (formData: loginType) => {
+    axios
+      .post(import.meta.env.VITE_SERVER_DOMAIN + "/api/auth/login", formData)
+      .then(({ data }) => {
+        setUserData(data);
+      })
+      .catch(({ response }) => {
+        console.log(response);
+      });
+  };
 
   return (
     <div className="mx-4">
@@ -55,7 +72,7 @@ const SignInForm = () => {
             render={({ field }) => (
               <FormItem className="w-full">
                 <FormControl>
-                  <PasswordInput field={field} placeholder="Set Password" />
+                  <LoginPasswordInput field={field} placeholder="Set Password" />
                 </FormControl>
                 <FormMessage />
               </FormItem>

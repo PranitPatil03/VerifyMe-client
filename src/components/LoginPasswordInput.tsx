@@ -2,13 +2,14 @@ import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { useState } from "react";
 import { Input } from "./ui/input";
 import { ControllerRenderProps } from "react-hook-form";
-import { signUpType} from "@/lib/utils";
+import { loginType} from "@/lib/utils";
+
 interface signUpPasswordInputProps {
-  field: ControllerRenderProps<signUpType>;
+  field: ControllerRenderProps<loginType>;
   placeholder: string;
 }
 
-export function PasswordInput({ field, placeholder }: (signUpPasswordInputProps)) {
+export function LoginPasswordInput({ field, placeholder }: (signUpPasswordInputProps)) {
   const [showPassword, setShowPassword] = useState(false);
 
   const togglePasswordVisibility = () => {
