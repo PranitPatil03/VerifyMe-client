@@ -17,15 +17,40 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import axios from "axios";
 
-export const sendOtp = async (email: string) => {
-  axios
-    .post(import.meta.env.VITE_SERVER_DOMAIN + "/api/auth/send-mail", { email })
-    .then(({ data }) => {
-      console.log(data);
-    })
-    .catch(({ response }) => {
-      console.log(response);
-    });
+interface DataType {
+  message: string;
+  otp: string;
+}
+
+interface SignUpType {
+  email: string;
+  password: string;
+}
+
+interface UserDataType {
+  password: string;
+  firstName: string;
+  lastName: string;
+  confirmPassword: string;
+  phoneNumber: string;
+  email: string;
+}
+
+export const sendOtp = async (email: string): Promise<void> => {
+  try {
+    const response = await axios.post<DataType>(
+      `${import.meta.env.VITE_SERVER_DOMAIN}/api/auth/send-mail`,
+      { email }
+    );
+    const data = response.data;
+    console.log(data);
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      console.log(error.response);
+    } else {
+      console.log(error);
+    }
+  }
 };
 
 const SignUpForm = () => {
@@ -57,15 +82,21 @@ const SignUpForm = () => {
 
   console.log("Line 45", userData);
 
-  const signup = async (formData: signUpType) => {
-    axios
-      .post(import.meta.env.VITE_SERVER_DOMAIN + "/api/auth/signup", formData)
-      .then(({ data }) => {
-        setUserData(data);
-      })
-      .catch(({ response }) => {
-        console.log(response);
-      });
+  const signup = async (formData: SignUpType): Promise<void> => {
+    try {
+      const response = await axios.post<UserDataType>(
+        `${import.meta.env.VITE_SERVER_DOMAIN}/api/auth/signup`,
+        formData
+      );
+      const data = response.data;
+      setUserData(data);
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        console.log(error.response);
+      } else {
+        console.log(error);
+      }
+    }
   };
 
   return (

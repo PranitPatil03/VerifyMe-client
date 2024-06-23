@@ -10,21 +10,30 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { loginFormSchema, loginType} from "@/lib/utils";
+import { loginFormSchema, loginType } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useState } from "react";
 import { LoginPasswordInput } from "./LoginPasswordInput";
 
+interface UserDataType {
+  user: {
+    email: string;
+    accessToken: string;
+    firstName: string;
+    lastName: string;
+  };
+}
+
 const SignInForm = () => {
   const navigate = useNavigate();
-  const [userData, setUserData] = useState<loginType | undefined>();
+  const [userData, setUserData] = useState<UserDataType | undefined>();
 
   const form = useForm<z.infer<typeof loginFormSchema>>({
     resolver: zodResolver(loginFormSchema),
     defaultValues: {
       email: "",
-      password: ""
+      password: "",
     },
   });
 
@@ -39,15 +48,22 @@ const SignInForm = () => {
     navigate("/profile");
   }
 
-  const login = async (formData: loginType) => {
-    axios
-      .post(import.meta.env.VITE_SERVER_DOMAIN + "/api/auth/login", formData)
-      .then(({ data }) => {
-        setUserData(data);
-      })
-      .catch(({ response }) => {
-        console.log(response);
-      });
+  const login = async (formData: loginType): Promise<void> => {
+    try {
+      const response = await axios.post<UserDataType>(
+        `${import.meta.env.VITE_SERVER_DOMAIN}/api/auth/login`,
+        formData
+      );
+      const data = response.data;
+      console.log("Line 571", data);
+      setUserData(data);
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        console.log(error.response);
+      } else {
+        console.log(error);
+      }
+    }
   };
 
   return (
@@ -72,7 +88,10 @@ const SignInForm = () => {
             render={({ field }) => (
               <FormItem className="w-full">
                 <FormControl>
-                  <LoginPasswordInput field={field} placeholder="Set Password" />
+                  <LoginPasswordInput
+                    field={field}
+                    placeholder="Set Password"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
